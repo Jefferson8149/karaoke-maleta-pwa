@@ -6,6 +6,7 @@
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
+  "description": "Controle administrativo do Karaoke Maleta",
   "icons": [
     {
       "src": "icon.svg",
