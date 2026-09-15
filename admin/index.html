@@ -1,55 +1,47 @@
 <!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#050505">
-<title>Karaoke Maleta — Admin</title>
-<link rel="manifest" href="manifest.webmanifest?v=020">
-<style>
-*{box-sizing:border-box}body{margin:0;background:#050505;color:#fff;font-family:Arial,sans-serif;min-height:100vh;display:grid;place-items:center}.load{width:min(430px,90vw);text-align:center}.logo{font-size:31px;font-weight:1000;color:#ffd21f;margin-bottom:10px}.msg{color:#aaa;line-height:1.5}.err{color:#ff7d7d;white-space:pre-wrap}.spin{width:38px;height:38px;border:4px solid #332b19;border-top-color:#ffd21f;border-radius:50%;margin:22px auto;animation:r 1s linear infinite}@keyframes r{to{transform:rotate(360deg)}}
-</style>
-</head>
-<body>
-<div class="load"><div class="logo">KARAOKÊ MALETA</div><div class="spin"></div><div id="msg" class="msg">Conectando ao Karaoke Maleta…</div></div>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505"><title>Karaoke Maleta — Admin</title>
+<link rel="manifest" href="/karaoke-maleta-pwa/admin/manifest.webmanifest">
+<style>html,body{margin:0;background:#050505;color:#fff;font-family:Arial,sans-serif}#boot{min-height:100vh;display:grid;place-items:center;padding:24px;text-align:center}#boot b{color:#ffd21f;font-size:24px}#boot small{display:block;color:#aaa;margin-top:10px}</style>
+</head><body><div id="boot"><div><b>KARAOKÊ MALETA</b><small id="bootMsg">Conectando à maleta…</small></div></div>
 <script>
-const KM_KEY='karaokeMaletaLocalEndpoint';
-const qs=new URLSearchParams(location.search);
-let endpoint=String(qs.get('local')||localStorage.getItem(KM_KEY)||'').trim().replace(/\/$/,'');
-if(endpoint&&!/^https?:\/\//i.test(endpoint))endpoint='http://'+endpoint;
-if(qs.get('local')){localStorage.setItem(KM_KEY,endpoint);qs.delete('local');history.replaceState({},'',location.pathname+(qs.toString()?'?'+qs:'')+location.hash)}
-const msg=document.getElementById('msg');
+const ROLE='admin', KEY='karaokeMaletaLocalEndpoint', ROOT='/karaoke-maleta-pwa';
 const nativeFetch=window.fetch.bind(window);
-function localUrl(path){return endpoint+path}
-function lna(input,init={}){return nativeFetch(input,{...init,mode:'cors',cache:'no-store',targetAddressSpace:'local'})}
+function norm(v){v=String(v||'').trim().replace(/\/$/,'');if(!v)return '';if(!/^https?:\/\//i.test(v))v='http://'+v;return v}
+const qs=new URLSearchParams(location.search); const fromQr=norm(qs.get('local'));
+if(fromQr){localStorage.setItem(KEY,fromQr);qs.delete('local');history.replaceState({},'',location.pathname+(qs.toString()?'?'+qs:'')+location.hash)}
+const local=norm(localStorage.getItem(KEY)||'');
+function lf(path,opt={}){return nativeFetch(local+path,{...opt,mode:'cors',cache:'no-store',targetAddressSpace:'local'})}
 window.fetch=function(input,init={}){
-  if(typeof input==='string'&&(input.startsWith('/api/')||input.startsWith('/media/'))) input=localUrl(input);
-  if(typeof input==='string'&&endpoint&&input.startsWith(endpoint)) return lna(input,init);
+  if(typeof input==='string'&&(input.startsWith('/api/')||input.startsWith('/media/'))) return lf(input,init);
   return nativeFetch(input,init);
 };
-async function text(path){const r=await lna(localUrl(path));if(!r.ok)throw new Error(path+' → HTTP '+r.status);return r.text()}
-async function blobUrl(path){const r=await lna(localUrl(path));if(!r.ok)throw new Error(path+' → HTTP '+r.status);return URL.createObjectURL(await r.blob())}
 async function boot(){
-  if(!endpoint){msg.innerHTML='Abra este aplicativo pelo <b>QR Code Admin</b> mostrado no Karaoke Maleta no notebook.';document.querySelector('.spin').style.display='none';return}
+  const msg=document.getElementById('bootMsg');
+  if(!local){msg.textContent='Abra este aplicativo pelo QR Code exibido no Karaoke Maleta.';return}
   try{
-    msg.textContent='Carregando o PWA Admin original…';
-    const [html,css,js,logo,bg]=await Promise.all([
-      text('/admin/index.html'),text('/admin/admin.css'),text('/admin/admin.js'),
-      blobUrl('/assets/karaoke_maleta_logo.png'),blobUrl('/assets/maletaoke_brand_full.png')
+    const basePath='/'+ROLE+'/';
+    const [html,css,js]=await Promise.all([
+      lf(basePath+'index.html').then(r=>{if(!r.ok)throw Error('html');return r.text()}),
+      lf(basePath+ROLE+'.css').then(r=>{if(!r.ok)throw Error('css');return r.text()}),
+      lf(basePath+ROLE+'.js').then(r=>{if(!r.ok)throw Error('js');return r.text()})
     ]);
-    const bm=html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);if(!bm)throw new Error('HTML local inválido');
-    let body=bm[1].replace(/<script[\s\S]*?<\/script>/gi,'');
-    body=body.replace(/src=["']assets\/karaoke_maleta_logo\.png["']/gi,'src="'+logo+'"');
-    const localCss=css.replace(/url\(["']?assets\/maletaoke_brand_full\.png["']?\)/gi,'url("'+bg+'")');
-    document.head.insertAdjacentHTML('beforeend','<style>'+localCss+'</style>');
+    const doc=new DOMParser().parseFromString(html,'text/html');
+    let body=doc.body.innerHTML
+      .replaceAll('assets/karaoke_maleta_logo.png','../singer/icon.svg')
+      .replaceAll('assets/icon-192.png','../singer/icon.svg')
+      .replaceAll('assets/icon-512.png','../singer/icon.svg');
     document.body.innerHTML=body;
-    let localJs=js.replace(/navigator\.serviceWorker\.register\(["']\/admin\/sw\.js["']\)/g,"navigator.serviceWorker.register('/karaoke-maleta-pwa/admin/sw.js')");
-    const s=document.createElement('script');s.textContent=localJs;document.body.appendChild(s);
+    const st=document.createElement('style');
+    st.textContent=css.replaceAll("url('assets/maletaoke_brand_full.png')",'none').replaceAll('url("assets/maletaoke_brand_full.png")','none');
+    document.head.appendChild(st);
+    const sc=document.createElement('script');
+    let code=js.replace("navigator.serviceWorker.register('/"+ROLE+"/sw.js')","navigator.serviceWorker.register(ROOT+'/'+ROLE+'/sw.js')");
+    sc.textContent=code;
+    document.body.appendChild(sc);
   }catch(e){
-    console.error(e);document.querySelector('.spin')?.remove();msg.className='msg err';msg.textContent='Não foi possível conectar ao notebook.\n\n'+(e?.message||e)+'\n\nConfira se o celular está na mesma rede/Hotspot e se o Karaoke Maleta está aberto.';
+    document.body.innerHTML='<div id="boot"><div><b>KARAOKÊ MALETA</b><small>Não foi possível conectar ao notebook. Verifique se o celular está na mesma rede Wi‑Fi/Hotspot e abra novamente pelo QR Code.</small></div></div>';
   }
 }
 boot();
-</script>
-</body>
-</html>
+</script></body></html>
