@@ -1,30 +1,55 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#050505"><title>Karaoke Maleta</title>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<title>Karaoke Maleta — Cantor</title>
+<link rel="manifest" href="manifest.webmanifest?v=020">
 <style>
-*{box-sizing:border-box}body{margin:0;background:#050505;color:#fff;font-family:Arial}header{position:sticky;top:0;background:#090909;border-bottom:1px solid #4b3d20;padding:12px;display:flex;align-items:center;gap:10px;z-index:5}header img{width:54px;height:54px}header b{color:#ffd21f;font-size:21px}main{max-width:760px;margin:auto;padding:14px}.card{background:#0d0d0d;border:1px solid #3e3420;border-radius:14px;padding:12px;margin-bottom:12px}input{width:100%;padding:13px;border-radius:10px;border:1px solid #594923;background:#111;color:#fff;font-size:16px}button{border:0;border-radius:9px;padding:9px 11px;background:#ffd21f;color:#171006;font-weight:900}.song{display:grid;grid-template-columns:64px 1fr auto;gap:9px;align-items:center;padding:10px 0;border-bottom:1px solid #292316}.code{color:#ffd21f;font-weight:900}.artist,.muted{color:#aaa;font-size:12px}#install{position:fixed;right:12px;bottom:12px}.status{color:#ffd21f;font-size:12px}.mine{padding:8px 0;border-bottom:1px solid #292316}dialog{background:#0c0c0c;color:#fff;border:1px solid #604e24;border-radius:14px;max-width:360px;width:90%}
-</style></head><body>
-<header><img src="icon.svg"><div><b>KARAOKÊ MALETA</b><div class="status" id="conn">Conectando…</div></div></header>
-<main>
-<div class="card" id="profileCard"><b>Seu nome</b><input id="name" placeholder="Digite seu nome"><button onclick="saveName()" style="margin-top:8px">Entrar</button></div>
-<div class="card"><input id="q" placeholder="Buscar código, artista ou música"></div>
-<div class="card"><b>Minha fila</b><div id="mine" class="muted">Nenhuma reserva.</div></div>
-<div class="card"><b>Catálogo</b><div id="results"></div></div>
-</main><button id="install">Instalar app</button>
-<dialog id="dlg"><h3>Reservar música?</h3><div id="sel"></div><div style="display:flex;gap:8px;margin-top:14px"><button onclick="reserve()">Reservar</button><button onclick="dlg.close()" style="background:#333;color:#fff">Cancelar</button></div></dialog>
+*{box-sizing:border-box}body{margin:0;background:#050505;color:#fff;font-family:Arial,sans-serif;min-height:100vh;display:grid;place-items:center}.load{width:min(430px,90vw);text-align:center}.logo{font-size:31px;font-weight:1000;color:#ffd21f;margin-bottom:10px}.msg{color:#aaa;line-height:1.5}.err{color:#ff7d7d;white-space:pre-wrap}.spin{width:38px;height:38px;border:4px solid #332b19;border-top-color:#ffd21f;border-radius:50%;margin:22px auto;animation:r 1s linear infinite}@keyframes r{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="load"><div class="logo">KARAOKÊ MALETA</div><div class="spin"></div><div id="msg" class="msg">Conectando ao Karaoke Maleta…</div></div>
 <script>
-const qp=new URLSearchParams(location.search), K='kmLocalEndpoint';
-const q=qp.get('local'); if(q){localStorage.setItem(K,q.replace(/\/$/,'')); qp.delete('local'); history.replaceState({},'',location.pathname+(qp.toString()?'?'+qp:''));}
-const LOCAL=()=>localStorage.getItem(K)||'';
-async function api(path,opt={}){const base=LOCAL(); if(!base) throw Error('Abra pelo QR Code do Karaoke Maleta.'); return fetch(base+path,{...opt,mode:'cors',targetAddressSpace:'local',cache:'no-store'});}
-let profile=localStorage.getItem('kmSingerName')||'', catalog=[], selected=null, promptEvent=null;
-const $=s=>document.querySelector(s); const esc=s=>String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-function saveName(){profile=$('#name').value.trim();if(!profile)return;localStorage.setItem('kmSingerName',profile);renderProfile();refresh();}
-function renderProfile(){$('#profileCard').style.display=profile?'none':'block';$('#name').value=profile}
-async function search(){try{catalog=await api('/api/catalog?q='+encodeURIComponent($('#q').value)).then(r=>r.json()); $('#results').innerHTML=catalog.slice(0,100).map((x,i)=>`<div class="song"><div class="code">${esc(x.code)}</div><div><b>${esc(x.title)}</b><div class="artist">${esc(x.artist)}</div></div><button onclick="pick(${i})">＋</button></div>`).join('')||'<div class="muted">Nada encontrado.</div>';$('#conn').textContent='Conectado à maleta';}catch(e){$('#conn').textContent=e.message;}}
-function pick(i){selected=catalog[i];$('#sel').textContent=selected.title+' — '+selected.artist;dlg.showModal()}
-async function reserve(){if(!profile){dlg.close();alert('Informe seu nome primeiro.');return};let id=localStorage.getItem('kmSingerId');if(!id){id=crypto.randomUUID?.()||String(Date.now());localStorage.setItem('kmSingerId',id)};const r=await api('/api/reserve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({song:selected,singer:profile,singerId:id})}).then(r=>r.json());dlg.close();if(r.ok){alert('Reserva adicionada. Posição '+r.position);refresh()}}
-async function refresh(){if(!LOCAL()){$('#conn').textContent='Abra pelo QR Code do Karaoke Maleta';return};try{let id=localStorage.getItem('kmSingerId')||'';const st=await api('/api/state?clientId='+encodeURIComponent(id)+'&clientName='+encodeURIComponent(profile||'Cantor')+'&role=cantor&ts='+Date.now()).then(r=>r.json());const mine=(st.queue||[]).filter(x=>!id||x.singerId===id);$('#mine').innerHTML=mine.length?mine.map((x,i)=>`<div class="mine"><b>${i+1}º · ${esc(x.title)}</b><div class="artist">${esc(x.artist)}</div></div>`).join(''):'<div class="muted">Nenhuma reserva.</div>';}catch(e){$('#conn').textContent='Sem conexão local';}}
-$('#q').oninput=()=>search();window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptEvent=e});
-$('#install').onclick=async()=>{if(promptEvent){promptEvent.prompt();await promptEvent.userChoice;promptEvent=null}else alert('Use o menu do navegador → Instalar app / Adicionar à tela inicial.')};
-if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');renderProfile();search();refresh();setInterval(refresh,2500);
-</script></body></html>
+const KM_KEY='karaokeMaletaLocalEndpoint';
+const qs=new URLSearchParams(location.search);
+let endpoint=String(qs.get('local')||localStorage.getItem(KM_KEY)||'').trim().replace(/\/$/,'');
+if(endpoint&&!/^https?:\/\//i.test(endpoint))endpoint='http://'+endpoint;
+if(qs.get('local')){localStorage.setItem(KM_KEY,endpoint);qs.delete('local');history.replaceState({},'',location.pathname+(qs.toString()?'?'+qs:'')+location.hash)}
+const msg=document.getElementById('msg');
+const nativeFetch=window.fetch.bind(window);
+function localUrl(path){return endpoint+path}
+function lna(input,init={}){return nativeFetch(input,{...init,mode:'cors',cache:'no-store',targetAddressSpace:'local'})}
+window.fetch=function(input,init={}){
+  if(typeof input==='string'&&(input.startsWith('/api/')||input.startsWith('/media/'))) input=localUrl(input);
+  if(typeof input==='string'&&endpoint&&input.startsWith(endpoint)) return lna(input,init);
+  return nativeFetch(input,init);
+};
+async function text(path){const r=await lna(localUrl(path));if(!r.ok)throw new Error(path+' → HTTP '+r.status);return r.text()}
+async function blobUrl(path){const r=await lna(localUrl(path));if(!r.ok)throw new Error(path+' → HTTP '+r.status);return URL.createObjectURL(await r.blob())}
+async function boot(){
+  if(!endpoint){msg.innerHTML='Abra este aplicativo pelo <b>QR Code Cantor</b> mostrado no Karaoke Maleta no notebook.';document.querySelector('.spin').style.display='none';return}
+  try{
+    msg.textContent='Carregando o PWA Cantor original…';
+    const [html,css,js,logo,bg]=await Promise.all([
+      text('/singer/index.html'),text('/singer/singer.css'),text('/singer/singer.js'),
+      blobUrl('/assets/karaoke_maleta_logo.png'),blobUrl('/assets/maletaoke_brand_full.png')
+    ]);
+    const bm=html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);if(!bm)throw new Error('HTML local inválido');
+    let body=bm[1].replace(/<script[\s\S]*?<\/script>/gi,'');
+    body=body.replace(/src=["']assets\/karaoke_maleta_logo\.png["']/gi,'src="'+logo+'"');
+    const localCss=css.replace(/url\(["']?assets\/maletaoke_brand_full\.png["']?\)/gi,'url("'+bg+'")');
+    document.head.insertAdjacentHTML('beforeend','<style>'+localCss+'</style>');
+    document.body.innerHTML=body;
+    let localJs=js.replace(/navigator\.serviceWorker\.register\(["']\/singer\/sw\.js["']\)/g,"navigator.serviceWorker.register('/karaoke-maleta-pwa/singer/sw.js')");
+    const s=document.createElement('script');s.textContent=localJs;document.body.appendChild(s);
+  }catch(e){
+    console.error(e);document.querySelector('.spin')?.remove();msg.className='msg err';msg.textContent='Não foi possível conectar ao notebook.\n\n'+(e?.message||e)+'\n\nConfira se o celular está na mesma rede/Hotspot e se o Karaoke Maleta está aberto.';
+  }
+}
+boot();
+</script>
+</body>
+</html>
