@@ -9,8 +9,14 @@
   "description": "Geração e administração de licenças do Karaoke Maleta",
   "icons": [
     {
-      "src": "/karaoke-maleta-pwa/singer/icon.svg",
-      "sizes": "any",
+      "src": "/karaoke-maleta-pwa/licencas/logo.svg?v=3",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/karaoke-maleta-pwa/licencas/logo.svg?v=3",
+      "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
