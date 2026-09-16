@@ -6,12 +6,12 @@
 <meta name="theme-color" content="#080808">
 <title>Karaoke Maleta — Licenças</title>
 <link rel="manifest" href="/karaoke-maleta-pwa/licencas/manifest.webmanifest">
-<link rel="stylesheet" href="/karaoke-maleta-pwa/licencas/app.css?v=2">
+<link rel="stylesheet" href="/karaoke-maleta-pwa/licencas/app.css?v=3">
 </head>
 <body>
 <div id="loginView" class="center">
   <div class="loginCard">
-    <img src="/karaoke-maleta-pwa/singer/assets/karaoke_maleta_logo.png" class="logo" alt="Karaoke Maleta">
+    <img src="/karaoke-maleta-pwa/singer/icon.svg" class="logo" alt="Karaoke Maleta">
     <div class="eyebrow">LICENÇAS</div>
     <h1>Administrador</h1>
     <p>Entre para gerar e administrar as licenças do Karaoke Maleta.</p>
@@ -23,7 +23,7 @@
 
 <div id="appView" class="hidden">
 <header>
-  <div class="brand"><img src="/karaoke-maleta-pwa/singer/assets/karaoke_maleta_logo.png"><span>Licenças</span></div>
+  <div class="brand"><img src="/karaoke-maleta-pwa/singer/icon.svg" alt="Karaoke Maleta"><span>Licenças</span></div>
   <div class="headActions">
     <button id="installBtn" class="ghost">⬇ Instalar app</button>
     <button class="ghost" onclick="logout()">Sair</button>
@@ -107,12 +107,12 @@
 
 <div id="modal" class="modal" onclick="if(event.target===this)closeModal()">
   <div class="modalCard">
-    <img src="/karaoke-maleta-pwa/singer/assets/karaoke_maleta_logo.png" class="modalLogo">
+    <img src="/karaoke-maleta-pwa/singer/icon.svg" class="modalLogo" alt="Karaoke Maleta">
     <h3 id="modalTitle">Karaoke Maleta</h3>
     <p id="modalText"></p>
     <div class="modalActions" id="modalActions"><button class="primary" onclick="closeModal()">OK</button></div>
   </div>
 </div>
 
-<script src="/karaoke-maleta-pwa/licencas/app.js?v=2"></script>
+<script src="/karaoke-maleta-pwa/licencas/app.js?v=3"></script>
 </body></html>
