@@ -11,7 +11,7 @@
 <body>
 <div id="loginView" class="center">
   <div class="loginCard">
-    <img src="/karaoke-maleta-pwa/licencas/logo.svg?v=3" class="logo" alt="Karaoke Maleta">
+    <img src="https://raw.githubusercontent.com/Jefferson8149/karaoke-maleta-pwa/main/singer/icon.svg" class="logo" alt="Karaoke Maleta">
     <div class="eyebrow">LICENÇAS</div>
     <h1>Administrador</h1>
     <p>Entre para gerar e administrar as licenças do Karaoke Maleta.</p>
@@ -21,7 +21,7 @@
   </div>
 </div>
 <div id="appView" class="hidden">
-<header><div class="brand"><img src="/karaoke-maleta-pwa/licencas/logo.svg?v=3"><span>Licenças</span></div><div class="headActions"><button id="installBtn" class="ghost">⬇ Instalar app</button><button class="ghost" onclick="logout()">Sair</button></div></header>
+<header><div class="brand"><img src="https://raw.githubusercontent.com/Jefferson8149/karaoke-maleta-pwa/main/singer/icon.svg"><span>Licenças</span></div><div class="headActions"><button id="installBtn" class="ghost">⬇ Instalar app</button><button class="ghost" onclick="logout()">Sair</button></div></header>
 <nav><button class="on" data-tab="new">＋ Nova licença</button><button data-tab="history">☰ Histórico</button></nav>
 <main>
 <section id="new" class="tab on"><div class="hero"><div><span class="eyebrow">NOVA ATIVAÇÃO</span><h2>Gerar licença</h2><p>Vincule a licença ao ID exibido pelo computador do cliente.</p></div></div>
@@ -29,6 +29,6 @@
 <div id="resultCard" class="card result hidden"><div class="resultTop"><div><span class="eyebrow">LICENÇA GERADA</span><h3 id="resultCustomer"></h3></div><span class="status active">ATIVA</span></div><div class="meta" id="resultMeta"></div><textarea id="licenseCode" readonly></textarea><div class="actions"><button class="primary" onclick="copyLicense()">Copiar licença</button><button class="ghost" onclick="shareLicense()">Compartilhar</button></div></div></section>
 <section id="history" class="tab"><div class="historyTop"><div><span class="eyebrow">CONTROLE</span><h2>Histórico de licenças</h2></div><button class="ghost" onclick="loadLicenses()">Atualizar</button></div><div class="filters"><input id="search" placeholder="Buscar cliente, ID do PC ou licença..." oninput="debouncedLoad()"><select id="statusFilter" onchange="loadLicenses()"><option value="all">Todas</option><option value="active">Ativas</option><option value="revoked">Revogadas</option></select></div><div id="licenseList"></div></section>
 </main></div>
-<div id="modal" class="modal" onclick="if(event.target===this)closeModal()"><div class="modalCard"><img src="/karaoke-maleta-pwa/licencas/logo.svg?v=3" class="modalLogo"><h3 id="modalTitle">Karaoke Maleta</h3><p id="modalText"></p><div class="modalActions" id="modalActions"><button class="primary" onclick="closeModal()">OK</button></div></div></div>
+<div id="modal" class="modal" onclick="if(event.target===this)closeModal()"><div class="modalCard"><img src="https://raw.githubusercontent.com/Jefferson8149/karaoke-maleta-pwa/main/singer/icon.svg" class="modalLogo"><h3 id="modalTitle">Karaoke Maleta</h3><p id="modalText"></p><div class="modalActions" id="modalActions"><button class="primary" onclick="closeModal()">OK</button></div></div></div>
 <script src="/karaoke-maleta-pwa/licencas/app.js?v=2"></script>
 </body></html>
