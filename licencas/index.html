@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080808">
 <title>Karaoke Maleta — Licenças</title>
-<link rel="manifest" href="/karaoke-maleta-pwa/licencas/manifest.webmanifest?v=4">
-<link rel="icon" href="/karaoke-maleta-pwa/licencas/logo-km.svg?v=4" type="image/svg+xml">
+<link rel="manifest" href="/karaoke-maleta-pwa/licencas/manifest.webmanifest?v=5">
+<link rel="icon" href="/karaoke-maleta-pwa/licencas/logo.svg?v=5" type="image/svg+xml">
 <link rel="stylesheet" href="/karaoke-maleta-pwa/licencas/app.css?v=4">
 </head>
 <body>
 <div id="loginView" class="center">
   <div class="loginCard">
-    <img src="/karaoke-maleta-pwa/licencas/logo-km.svg?v=4" class="logo" alt="Karaoke Maleta">
+    <img src="/karaoke-maleta-pwa/licencas/logo.svg?v=5" class="logo" alt="Karaoke Maleta">
     <div class="eyebrow">LICENÇAS</div>
     <h1>Administrador</h1>
     <p>Entre para gerar e administrar as licenças do Karaoke Maleta.</p>
@@ -21,29 +21,15 @@
     <div id="loginError" class="error"></div>
   </div>
 </div>
-
 <div id="appView" class="hidden">
-<header>
-  <div class="brand"><img src="/karaoke-maleta-pwa/licencas/logo-km.svg?v=4"><span>Licenças</span></div>
-  <div class="headActions"><button id="installBtn" class="ghost">⬇ Instalar app</button><button class="ghost" onclick="logout()">Sair</button></div>
-</header>
+<header><div class="brand"><img src="/karaoke-maleta-pwa/licencas/logo.svg?v=5"><span>Licenças</span></div><div class="headActions"><button id="installBtn" class="ghost">⬇ Instalar app</button><button class="ghost" onclick="logout()">Sair</button></div></header>
 <nav><button class="on" data-tab="new">＋ Nova licença</button><button data-tab="history">☰ Histórico</button></nav>
 <main>
-<section id="new" class="tab on">
-  <div class="hero"><div><span class="eyebrow">NOVA ATIVAÇÃO</span><h2>Gerar licença</h2><p>Vincule a licença ao ID exibido pelo computador do cliente.</p></div></div>
-  <div class="card formGrid">
-    <label>Cliente<input id="customer" maxlength="120" placeholder="Nome do cliente"></label>
-    <label>ID do computador<input id="machineId" maxlength="100" placeholder="KM-XXXX-XXXX-XXXX" autocomplete="off"></label>
-    <label>Tipo da licença<select id="licenseType" onchange="toggleCustomDays()"><option value="lifetime">Vitalícia</option><option value="30d">30 dias</option><option value="1y">1 ano</option><option value="trial">Teste — 7 dias</option><option value="custom">Personalizada</option></select></label>
-    <label id="customDaysWrap" class="hidden">Validade em dias<input id="customDays" type="number" min="1" max="3650" value="30"></label>
-    <label class="wide">Observações<textarea id="notes" maxlength="500" placeholder="Opcional"></textarea></label>
-    <div class="wide actions"><button class="primary" onclick="generateLicense()">Gerar licença</button><button class="ghost" onclick="clearForm()">Limpar</button></div>
-  </div>
-  <div id="resultCard" class="card result hidden"><div class="resultTop"><div><span class="eyebrow">LICENÇA GERADA</span><h3 id="resultCustomer"></h3></div><span class="status active">ATIVA</span></div><div class="meta" id="resultMeta"></div><textarea id="licenseCode" readonly></textarea><div class="actions"><button class="primary" onclick="copyLicense()">Copiar licença</button><button class="ghost" onclick="shareLicense()">Compartilhar</button></div></div>
-</section>
+<section id="new" class="tab on"><div class="hero"><div><span class="eyebrow">NOVA ATIVAÇÃO</span><h2>Gerar licença</h2><p>Vincule a licença ao ID exibido pelo computador do cliente.</p></div></div>
+<div class="card formGrid"><label>Cliente<input id="customer" maxlength="120" placeholder="Nome do cliente"></label><label>ID do computador<input id="machineId" maxlength="100" placeholder="KM-XXXX-XXXX-XXXX" autocomplete="off"></label><label>Tipo da licença<select id="licenseType" onchange="toggleCustomDays()"><option value="lifetime">Vitalícia</option><option value="30d">30 dias</option><option value="1y">1 ano</option><option value="trial">Teste — 7 dias</option><option value="custom">Personalizada</option></select></label><label id="customDaysWrap" class="hidden">Validade em dias<input id="customDays" type="number" min="1" max="3650" value="30"></label><label class="wide">Observações<textarea id="notes" maxlength="500" placeholder="Opcional"></textarea></label><div class="wide actions"><button class="primary" onclick="generateLicense()">Gerar licença</button><button class="ghost" onclick="clearForm()">Limpar</button></div></div>
+<div id="resultCard" class="card result hidden"><div class="resultTop"><div><span class="eyebrow">LICENÇA GERADA</span><h3 id="resultCustomer"></h3></div><span class="status active">ATIVA</span></div><div class="meta" id="resultMeta"></div><textarea id="licenseCode" readonly></textarea><div class="actions"><button class="primary" onclick="copyLicense()">Copiar licença</button><button class="ghost" onclick="shareLicense()">Compartilhar</button></div></div></section>
 <section id="history" class="tab"><div class="historyTop"><div><span class="eyebrow">CONTROLE</span><h2>Histórico de licenças</h2></div><button class="ghost" onclick="loadLicenses()">Atualizar</button></div><div class="filters"><input id="search" placeholder="Buscar cliente, ID do PC ou licença..." oninput="debouncedLoad()"><select id="statusFilter" onchange="loadLicenses()"><option value="all">Todas</option><option value="active">Ativas</option><option value="revoked">Revogadas</option></select></div><div id="licenseList"></div></section>
-</main>
-</div>
-<div id="modal" class="modal" onclick="if(event.target===this)closeModal()"><div class="modalCard"><img src="/karaoke-maleta-pwa/licencas/logo-km.svg?v=4" class="modalLogo"><h3 id="modalTitle">Karaoke Maleta</h3><p id="modalText"></p><div class="modalActions" id="modalActions"><button class="primary" onclick="closeModal()">OK</button></div></div></div>
-<script src="/karaoke-maleta-pwa/licencas/app.js?v=4"></script>
+</main></div>
+<div id="modal" class="modal" onclick="if(event.target===this)closeModal()"><div class="modalCard"><img src="/karaoke-maleta-pwa/licencas/logo.svg?v=5" class="modalLogo"><h3 id="modalTitle">Karaoke Maleta</h3><p id="modalText"></p><div class="modalActions" id="modalActions"><button class="primary" onclick="closeModal()">OK</button></div></div></div>
+<script src="/karaoke-maleta-pwa/licencas/app.js?v=2"></script>
 </body></html>
