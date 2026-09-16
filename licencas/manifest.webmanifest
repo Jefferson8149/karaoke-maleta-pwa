@@ -1,0 +1,24 @@
+{
+  "name": "Karaoke Maleta — Licenças",
+  "short_name": "KM Licenças",
+  "start_url": "/karaoke-maleta-pwa/licencas/",
+  "scope": "/karaoke-maleta-pwa/licencas/",
+  "display": "standalone",
+  "background_color": "#070707",
+  "theme_color": "#080808",
+  "description": "Geração e administração de licenças do Karaoke Maleta",
+  "icons": [
+    {
+      "src": "/karaoke-maleta-pwa/singer/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/karaoke-maleta-pwa/singer/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
