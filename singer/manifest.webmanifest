@@ -1,11 +1,17 @@
 {
-  "name": "Karaoke Maleta",
+  "name": "Karaoke Maleta — Cantor",
   "short_name": "Karaoke Maleta",
+  "id": "/karaoke-maleta-pwa/singer/",
   "start_url": "/karaoke-maleta-pwa/singer/",
   "scope": "/karaoke-maleta-pwa/singer/",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "background_color": "#050505",
   "theme_color": "#050505",
+  "description": "Catálogo, reservas, sorteio e votação do Karaoke Maleta",
   "icons": [
     {
       "src": "/karaoke-maleta-pwa/singer/icon.svg",
