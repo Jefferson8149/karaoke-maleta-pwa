@@ -5,43 +5,17 @@
 <style>html,body{margin:0;background:#050505;color:#fff;font-family:Arial,sans-serif}#boot{min-height:100vh;display:grid;place-items:center;padding:24px;text-align:center}#boot b{color:#ffd21f;font-size:24px}#boot small{display:block;color:#aaa;margin-top:10px}</style>
 </head><body><div id="boot"><div><b>KARAOKÊ MALETA</b><small id="bootMsg">Conectando à maleta…</small></div></div>
 <script>
-const ROLE='singer', KEY='karaokeMaletaLocalEndpoint', ROOT='/karaoke-maleta-pwa';
-const nativeFetch=window.fetch.bind(window);
+const ROLE='singer',KEY='karaokeMaletaLocalEndpoint';
 function norm(v){v=String(v||'').trim().replace(/\/$/,'');if(!v)return '';if(!/^https?:\/\//i.test(v))v='http://'+v;return v}
-const qs=new URLSearchParams(location.search); const fromQr=norm(qs.get('local'));
-if(fromQr){localStorage.setItem(KEY,fromQr);qs.delete('local');history.replaceState({},'',location.pathname+(qs.toString()?'?'+qs:'')+location.hash)}
-const local=norm(localStorage.getItem(KEY)||'');
-function lf(path,opt={}){return nativeFetch(local+path,{...opt,mode:'cors',cache:'no-store',targetAddressSpace:'local'})}
-window.fetch=function(input,init={}){
-  if(typeof input==='string'&&(input.startsWith('/api/')||input.startsWith('/media/'))) return lf(input,init);
-  return nativeFetch(input,init);
-};
-async function boot(){
-  const msg=document.getElementById('bootMsg');
-  if(!local){msg.textContent='Abra este aplicativo pelo QR Code exibido no Karaoke Maleta.';return}
-  try{
-    const basePath='/'+ROLE+'/';
-    const [html,css,js]=await Promise.all([
-      lf(basePath+'index.html').then(r=>{if(!r.ok)throw Error('html');return r.text()}),
-      lf(basePath+ROLE+'.css').then(r=>{if(!r.ok)throw Error('css');return r.text()}),
-      lf(basePath+ROLE+'.js').then(r=>{if(!r.ok)throw Error('js');return r.text()})
-    ]);
-    const doc=new DOMParser().parseFromString(html,'text/html');
-    let body=doc.body.innerHTML
-      .replaceAll('assets/karaoke_maleta_logo.png','../singer/icon.svg')
-      .replaceAll('assets/icon-192.png','../singer/icon.svg')
-      .replaceAll('assets/icon-512.png','../singer/icon.svg');
-    document.body.innerHTML=body;
-    const st=document.createElement('style');
-    st.textContent=css.replaceAll("url('assets/maletaoke_brand_full.png')",'none').replaceAll('url("assets/maletaoke_brand_full.png")','none');
-    document.head.appendChild(st);
-    const sc=document.createElement('script');
-    let code=js.replace("navigator.serviceWorker.register('/"+ROLE+"/sw.js')","navigator.serviceWorker.register(ROOT+'/'+ROLE+'/sw.js')");
-    sc.textContent=code;
-    document.body.appendChild(sc);
-  }catch(e){
-    document.body.innerHTML='<div id="boot"><div><b>KARAOKÊ MALETA</b><small>Não foi possível conectar ao notebook. Verifique se o celular está na mesma rede Wi‑Fi/Hotspot e abra novamente pelo QR Code.</small></div></div>';
-  }
+const qs=new URLSearchParams(location.search);
+const fromQr=norm(qs.get('local'));
+if(fromQr)localStorage.setItem(KEY,fromQr);
+const local=fromQr||norm(localStorage.getItem(KEY)||'');
+if(local){
+  const target=local+'/'+ROLE+'/';
+  document.getElementById('bootMsg').textContent='Abrindo o Karaoke Maleta no notebook…';
+  setTimeout(()=>location.replace(target),80);
+}else{
+  document.getElementById('bootMsg').textContent='Leia novamente o QR Code exibido no Karaoke Maleta.';
 }
-boot();
 </script></body></html>
