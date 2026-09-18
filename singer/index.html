@@ -1,21 +1,52 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050505"><title>Karaoke Maleta — Cantor</title>
-<link rel="manifest" href="/karaoke-maleta-pwa/singer/manifest.webmanifest">
-<style>html,body{margin:0;background:#050505;color:#fff;font-family:Arial,sans-serif}#boot{min-height:100vh;display:grid;place-items:center;padding:24px;text-align:center}#boot b{color:#ffd21f;font-size:24px}#boot small{display:block;color:#aaa;margin-top:10px}</style>
-</head><body><div id="boot"><div><b>KARAOKÊ MALETA</b><small id="bootMsg">Conectando à maleta…</small></div></div>
+<link rel="manifest" href="/karaoke-maleta-pwa/singer/manifest.webmanifest?v=30">
+<link rel="icon" href="/karaoke-maleta-pwa/singer/icon.svg" type="image/svg+xml">
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#050505;color:#fff;font-family:Arial,sans-serif}
+main{min-height:100vh;display:grid;place-items:center;padding:24px}.card{width:min(420px,100%);text-align:center;background:#111;border:1px solid #2b2b2b;border-radius:22px;padding:28px;box-shadow:0 20px 70px #0008}
+.logo{width:148px;height:148px;border-radius:32px;margin-bottom:16px}.title{color:#ffd21f;font-size:26px;font-weight:900}.muted{color:#aaa;line-height:1.45;margin:10px 0 20px}
+.actions{display:grid;gap:10px}button{border:0;border-radius:14px;padding:14px 16px;font-size:16px;font-weight:800;cursor:pointer}.primary{background:#ffd21f;color:#111}.secondary{background:#272727;color:#fff;border:1px solid #444}
+#installBtn[hidden]{display:none}.status{font-size:12px;color:#8f8f8f;margin-top:16px}
+</style></head>
+<body><main><div class="card">
+<img class="logo" src="/karaoke-maleta-pwa/singer/icon.svg" alt="Karaoke Maleta">
+<div class="title">KARAOKÊ MALETA</div>
+<div class="muted" id="msg">Conecte ao Karaoke Maleta e, se quiser, instale o app do cantor no celular.</div>
+<div class="actions">
+<button id="openBtn" class="primary">🎤 Abrir Karaoke</button>
+<button id="installBtn" class="secondary">⬇ Instalar app</button>
+</div>
+<div class="status" id="status"></div>
+</div></main>
 <script>
-const ROLE='singer',KEY='karaokeMaletaLocalEndpoint';
+const KEY='karaokeMaletaLocalEndpoint';
 function norm(v){v=String(v||'').trim().replace(/\/$/,'');if(!v)return '';if(!/^https?:\/\//i.test(v))v='http://'+v;return v}
 const qs=new URLSearchParams(location.search);
 const fromQr=norm(qs.get('local'));
 if(fromQr)localStorage.setItem(KEY,fromQr);
 const local=fromQr||norm(localStorage.getItem(KEY)||'');
-if(local){
-  const target=local+'/'+ROLE+'/';
-  document.getElementById('bootMsg').textContent='Abrindo o Karaoke Maleta no notebook…';
-  setTimeout(()=>location.replace(target),80);
-}else{
-  document.getElementById('bootMsg').textContent='Leia novamente o QR Code exibido no Karaoke Maleta.';
+const status=document.getElementById('status'),openBtn=document.getElementById('openBtn'),installBtn=document.getElementById('installBtn');
+let installPrompt=null;
+function openLocal(){
+  const target=(fromQr||norm(localStorage.getItem(KEY)||''));
+  if(!target){status.textContent='Leia novamente o QR Code exibido no Karaoke Maleta.';return}
+  status.textContent='Abrindo o Karaoke Maleta no notebook…';
+  location.href=target+'/singer/';
 }
+openBtn.onclick=openLocal;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;installBtn.hidden=false;status.textContent='O app está pronto para ser instalado.'});
+installBtn.onclick=async()=>{
+  if(installPrompt){installPrompt.prompt();const r=await installPrompt.userChoice;installPrompt=null;if(r.outcome==='accepted')status.textContent='App instalado.';return}
+  status.textContent='No Chrome, use o menu ⋮ e escolha “Instalar app” ou “Adicionar à tela inicial”.';
+};
+window.addEventListener('appinstalled',()=>{installBtn.hidden=true;status.textContent='App instalado.'});
+if(matchMedia('(display-mode: standalone)').matches){
+  installBtn.hidden=true;
+  if(local)setTimeout(openLocal,350);
+}else{
+  status.textContent=local?'Conexão recebida pelo QR Code. Você pode abrir agora ou instalar o app.':'Leia o QR Code do Karaoke Maleta para conectar.';
+}
+if('serviceWorker'in navigator)navigator.serviceWorker.register('/karaoke-maleta-pwa/singer/sw.js',{scope:'/karaoke-maleta-pwa/singer/'}).catch(()=>{});
 </script></body></html>
