@@ -101,7 +101,16 @@ async function revokeLicense(id){
 }
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('#installBtn').style.display='inline-block'});
 window.addEventListener('appinstalled',()=>{$('#installBtn').style.display='none';installPrompt=null});
-$('#installBtn').onclick=async()=>{if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null}else notice('Karaoke Maleta','Use o menu do navegador e escolha “Instalar app”.')};
+$('#installBtn').style.display='inline-block';
+$('#installBtn').onclick=async()=>{
+  if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;return}
+  const ua=navigator.userAgent||'';
+  if(/iphone|ipad|ipod/i.test(ua)){
+    notice('Instalar app','No Safari, toque em Compartilhar e depois em “Adicionar à Tela de Início”.');
+  }else{
+    notice('Instalar app','No Chrome, toque no menu ⋮ e escolha “Instalar app” ou “Adicionar à tela inicial”.');
+  }
+};
 if(matchMedia('(display-mode: standalone)').matches)$('#installBtn').style.display='none';
-if('serviceWorker'in navigator)navigator.serviceWorker.register('/karaoke-maleta-pwa/licencas/sw.js').catch(()=>{});
+if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{});
 boot();
