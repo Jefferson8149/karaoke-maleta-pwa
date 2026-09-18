@@ -1,4 +1,4 @@
-const CACHE='karaoke-maleta-admin-loader-v019';
+const CACHE='karaoke-maleta-admin-loader-v20';
 const ROOT='/karaoke-maleta-pwa/admin/';
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll([ROOT,ROOT+'index.html',ROOT+'manifest.webmanifest','/karaoke-maleta-pwa/singer/icon.svg'])).catch(()=>{}))});
 self.addEventListener('activate',e=>e.waitUntil(Promise.all([caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE).map(x=>caches.delete(x)))),self.clients.claim()])));
