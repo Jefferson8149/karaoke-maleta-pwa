@@ -1,11 +1,11 @@
-name: Build Karaoke Maleta v0.10.38 Dual
+name: Build Karaoke Maleta v0.10.39 Dual
 
 on:
   push:
     branches:
       - desktop-v0.10.35-build
     paths:
-      - 'desktop-build/DUAL038'
+      - 'desktop-build/DUAL039'
 
 permissions:
   contents: read
@@ -17,20 +17,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Download v0.10.38 source
+      - name: Download v0.10.39 source
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri 'https://sdmntprbrazilsouth.oaiusercontent.com/files/00000000-dfb4-820e-9790-9a96f54df16c/raw?se=2026-09-19T17%3A16%3A04Z&sp=r&sv=2026-02-06&sr=b&scid=70fbb878-aa9f-5635-8ecd-ff641a70c6b2&skoid=33096a49-a96b-4506-9fc4-04a7517f8175&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-19T13%3A56%3A23Z&ske=2026-09-20T13%3A56%3A23Z&sks=b&skv=2026-02-06&sig=tKFABEEA54TbGW3Bu4oIGOgSm/lIX/6GumssOE1q8WA%3D' -OutFile 'source.zip'
+          Invoke-WebRequest -Uri 'https://sdmntprbrazilsouth.oaiusercontent.com/files/00000000-2e70-820e-b8ac-f1df8d484de9/raw?se=2026-09-19T17%3A43%3A00Z&sp=r&sv=2026-02-06&sr=b&scid=0748ce37-4c97-5891-8084-9f5b2cfcbb01&skoid=33096a49-a96b-4506-9fc4-04a7517f8175&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-19T11%3A10%3A06Z&ske=2026-09-20T11%3A10%3A06Z&sks=b&skv=2026-02-06&sig=pTbmmki3IZhXc2WWBSMEa395Rq78nDvUohKYCNC7lj8%3D' -OutFile 'source.zip'
           Expand-Archive -Path 'source.zip' -DestinationPath '.' -Force
           if(-not (Test-Path 'dual/licensed/package.json')) { throw 'Fonte licenciada não encontrada.' }
           if(-not (Test-Path 'dual/free/package.json')) { throw 'Fonte livre não encontrada.' }
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-
       - name: Validate licensed source
         working-directory: dual/licensed
         run: |
@@ -38,39 +35,33 @@ jobs:
           node --check licensing.js
           node --check singer/singer.js
           node --check admin/admin.js
-
       - name: Install licensed dependencies
         working-directory: dual/licensed
         run: npm install
-
       - name: Build licensed installer
         working-directory: dual/licensed
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: npm run dist:win
-
       - name: Validate free source
         working-directory: dual/free
         run: |
           node --check main.js
           node --check singer/singer.js
           node --check admin/admin.js
-
       - name: Install free dependencies
         working-directory: dual/free
         run: npm install
-
       - name: Build free installer
         working-directory: dual/free
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: npm run dist:win
-
       - name: Upload both installers
         uses: actions/upload-artifact@v4
         with:
-          name: Karaoke-Maleta-v0.10.38-Licenciado-e-Livre
+          name: Karaoke-Maleta-v0.10.39-Licenciado-e-Livre
           path: |
-            dual/licensed/dist/Karaoke_Maleta_Licenciado_Setup_0.10.38.exe
-            dual/free/dist/Karaoke_Maleta_Livre_Setup_0.10.38.exe
+            dual/licensed/dist/Karaoke_Maleta_Licenciado_Setup_0.10.39.exe
+            dual/free/dist/Karaoke_Maleta_Livre_Setup_0.10.39.exe
           if-no-files-found: error
