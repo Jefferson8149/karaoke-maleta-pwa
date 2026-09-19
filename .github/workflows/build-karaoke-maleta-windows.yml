@@ -1,11 +1,11 @@
-name: Build Karaoke Maleta Windows
+name: Build Karaoke Maleta Dual Windows
 
 on:
   push:
     branches:
       - desktop-v0.10.35-build
     paths:
-      - 'desktop-build/TRIGGER'
+      - 'desktop-build/DUAL'
 
 permissions:
   contents: read
@@ -13,35 +13,51 @@ permissions:
 jobs:
   build-windows:
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download finalized source
+      - name: Download base source
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri 'https://sdmntprbrazilsouth.oaiusercontent.com/files/00000000-b8dc-820e-a6e4-ade744b43ec6/raw?se=2026-09-19T03%3A04%3A47Z&sp=r&sv=2026-02-06&sr=b&scid=3f764509-8830-50ee-a3ea-fbcb67690ab2&skoid=33096a49-a96b-4506-9fc4-04a7517f8175&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-18T20%3A31%3A25Z&ske=2026-09-19T20%3A31%3A25Z&sks=b&skv=2026-02-06&sig=oYwZFgPePzQ8FPr7uvz4NRuU9dNtx25ofOQF3v6P/7E%3D' -OutFile 'buildfinal.zip'
-          Expand-Archive -Path 'buildfinal.zip' -DestinationPath '.' -Force
+          Invoke-WebRequest -Uri 'https://sdmntprbrazilsouth.oaiusercontent.com/files/00000000-bc48-820e-a989-75e9b30de742/raw?se=2026-09-19T03%3A27%3A49Z&sp=r&sv=2026-02-06&sr=b&scid=a2cb7b30-341c-5977-ab11-49f817c034bf&skoid=33096a49-a96b-4506-9fc4-04a7517f8175&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-18T20%3A25%3A27Z&ske=2026-09-19T20%3A25%3A27Z&sks=b&skv=2026-02-06&sig=rKPwI8ojrreQpNxSTdWrWmO1k4GU8GdjP%2BYf6Evm2kI%3D' -OutFile 'base.zip'
+          Expand-Archive -Path 'base.zip' -DestinationPath 'base' -Force
+          New-Item -ItemType Directory -Force -Path 'dual/licensed','dual/free' | Out-Null
+          Copy-Item 'base/buildfinal/*' 'dual/licensed' -Recurse -Force
+          Copy-Item 'base/buildfinal/*' 'dual/free' -Recurse -Force
+          node desktop-build/make-dual.js dual
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Install dependencies
-        working-directory: buildfinal
+      - name: Install licensed dependencies
+        working-directory: dual/licensed
         run: npm install
 
-      - name: Build Windows installer
-        working-directory: buildfinal
+      - name: Build licensed installer
+        working-directory: dual/licensed
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: npm run dist:win
 
-      - name: Upload installer
+      - name: Install free dependencies
+        working-directory: dual/free
+        run: npm install
+
+      - name: Build free installer
+        working-directory: dual/free
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run dist:win
+
+      - name: Upload both installers
         uses: actions/upload-artifact@v4
         with:
-          name: Karaoke-Maleta-Windows-v0.10.35-final
-          path: buildfinal/dist/Karaoke_Maleta_Setup_0.10.35.exe
+          name: Karaoke-Maleta-v0.10.36-Licenciado-e-Livre
+          path: |
+            dual/licensed/dist/Karaoke_Maleta_Licenciado_Setup_0.10.36.exe
+            dual/free/dist/Karaoke_Maleta_Livre_Setup_0.10.36.exe
           if-no-files-found: error
