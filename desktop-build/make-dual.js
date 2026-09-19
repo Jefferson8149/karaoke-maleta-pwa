@@ -6,6 +6,22 @@ for(const edition of ['licensed','free']){
   const d=JSON.parse(fs.readFileSync(pkgPath,'utf8'));
   d.version='0.10.36';
   d.licenseMode=edition==='free'?'free':'licensed';
+  d.private=true;
+  d.main='main.js';
+  d.scripts={start:'electron .','dist:win':'electron-builder --win nsis --x64'};
+  d.dependencies={express:'^5.1.0',qrcode:'^1.5.4','node-forge':'^1.3.1','pdf-parse':'^1.1.1'};
+  d.devDependencies={'electron-builder':'^26.0.12',electron:'^38.0.0'};
+  d.description='Karaoke Maleta - sistema de karaokê offline para Windows';
+  d.author='Karaoke Maleta';
+  d.build={
+    appId:'com.karaokemaleta.desktop',
+    productName:'Karaoke Maleta',
+    artifactName:'Karaoke_Maleta_Licenciado_Setup_${version}.${ext}',
+    directories:{output:'dist'},
+    files:['**/*','!dist/**','!public_pwa/**','!data/*.sqlite*','!data/backups/**','!README_v0.*.txt','!README_TESTE.txt','!INSTALAR_E_INICIAR.bat'],
+    win:{target:[{target:'nsis',arch:['x64']}],icon:'assets/karaoke_maleta_logo.png'},
+    nsis:{oneClick:false,perMachine:false,allowToChangeInstallationDirectory:true,createDesktopShortcut:true,createStartMenuShortcut:true,shortcutName:'Karaoke Maleta',deleteAppDataOnUninstall:false}
+  };
   if(edition==='licensed'){
     d.build.appId='com.karaokemaleta.desktop';
     d.build.productName='Karaoke Maleta';
