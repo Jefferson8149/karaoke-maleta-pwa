@@ -1,15 +1,14 @@
-name: Build Karaoke Maleta Dual Windows
+name: Build Karaoke Maleta v0.10.37 Dual
 
 on:
   push:
     branches:
       - desktop-v0.10.35-build
     paths:
-      - 'desktop-build/DUAL'
+      - 'desktop-build/DUAL037'
 
 permissions:
   contents: read
-  actions: read
 
 jobs:
   build-windows:
@@ -19,37 +18,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Download v0.10.37 source
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri 'https://sdmntprbrazilsouth.oaiusercontent.com/files/00000000-d958-820e-8853-f3ed41dfa2a5/raw?se=2026-09-19T14%3A36%3A36Z&sp=r&sv=2026-02-06&sr=b&scid=2dba1e93-548e-506e-b37b-159b15ec5146&skoid=33096a49-a96b-4506-9fc4-04a7517f8175&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-18T20%3A11%3A29Z&ske=2026-09-19T20%3A11%3A29Z&sks=b&skv=2026-02-06&sig=JnUP9u9ZVHLE4e1djIy7jrpOuBv1ih9EzAasKKEV%2BuE%3D' -OutFile 'source.zip'
+          Expand-Archive -Path 'source.zip' -DestinationPath '.' -Force
+          if(-not (Test-Path 'dual/licensed/package.json')) { throw 'Fonte licenciada não encontrada.' }
+          if(-not (Test-Path 'dual/free/package.json')) { throw 'Fonte livre não encontrada.' }
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Download previous working installers
-        uses: actions/download-artifact@v4
-        with:
-          name: Karaoke-Maleta-v0.10.36-Licenciado-e-Livre
-          path: previous
-          repository: Jefferson8149/karaoke-maleta-pwa
-          run-id: 35418400305
-          github-token: ${{ github.token }}
-
-      - name: Recover application source from previous installer
-        shell: pwsh
+      - name: Validate licensed source
+        working-directory: dual/licensed
         run: |
-          $installer = (Get-ChildItem 'previous' -Recurse -Filter 'Karaoke_Maleta_Licenciado_Setup_0.10.36.exe' | Select-Object -First 1).FullName
-          if(-not $installer){ throw 'Instalador base não encontrado.' }
-          $dest = Join-Path $env:GITHUB_WORKSPACE 'installed-base'
-          New-Item -ItemType Directory -Force -Path $dest | Out-Null
-          Start-Process -FilePath $installer -ArgumentList '/S',("/D="+$dest) -Wait
-          $asar = Join-Path $dest 'resources\app.asar'
-          if(-not (Test-Path $asar)){ throw 'app.asar não encontrado após instalar base.' }
-          npx --yes @electron/asar extract $asar recovered
-          New-Item -ItemType Directory -Force -Path 'dual\licensed','dual\free' | Out-Null
-          Copy-Item 'recovered\*' 'dual\licensed' -Recurse -Force
-          Copy-Item 'recovered\*' 'dual\free' -Recurse -Force
-          node desktop-build/make-dual.js dual
-          node --check dual/licensed/main.js
-          node --check dual/free/main.js
+          node --check main.js
+          node --check singer/singer.js
 
       - name: Install licensed dependencies
         working-directory: dual/licensed
@@ -61,6 +47,12 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: npm run dist:win
 
+      - name: Validate free source
+        working-directory: dual/free
+        run: |
+          node --check main.js
+          node --check singer/singer.js
+
       - name: Install free dependencies
         working-directory: dual/free
         run: npm install
@@ -71,11 +63,11 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: npm run dist:win
 
-      - name: Upload corrected installers
+      - name: Upload both installers
         uses: actions/upload-artifact@v4
         with:
-          name: Karaoke-Maleta-v0.10.36-Corrigida
+          name: Karaoke-Maleta-v0.10.37-Licenciado-e-Livre
           path: |
-            dual/licensed/dist/Karaoke_Maleta_Licenciado_Setup_0.10.36.exe
-            dual/free/dist/Karaoke_Maleta_Livre_Setup_0.10.36.exe
+            dual/licensed/dist/Karaoke_Maleta_Licenciado_Setup_0.10.37.exe
+            dual/free/dist/Karaoke_Maleta_Livre_Setup_0.10.37.exe
           if-no-files-found: error
