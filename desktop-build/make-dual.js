@@ -4,7 +4,7 @@ for(const edition of ['licensed','free']){
   const dir=path.join(root,edition);
   const pkgPath=path.join(dir,'package.json');
   const d=JSON.parse(fs.readFileSync(pkgPath,'utf8'));
-  d.version='0.10.37';
+  d.version='0.10.36';
   d.licenseMode=edition==='free'?'free':'licensed';
   if(edition==='licensed'){
     d.build.appId='com.karaokemaleta.desktop';
