@@ -1,0 +1,29 @@
+name: Inspect NSIS Base
+
+on:
+  push:
+    branches:
+      - desktop-v0.10.35-build
+    paths:
+      - 'desktop-build/PROBE3'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  inspect:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Karaoke-Maleta-v0.10.36-Licenciado-e-Livre
+          path: previous
+          repository: Jefferson8149/karaoke-maleta-pwa
+          run-id: 35418400305
+          github-token: ${{ github.token }}
+      - name: List NSIS
+        shell: pwsh
+        run: |
+          $installer=(Get-ChildItem previous -Recurse -Filter 'Karaoke_Maleta_Licenciado_Setup_0.10.36.exe'|Select-Object -First 1).FullName
+          & 'C:\Program Files\7-Zip\7z.exe' l $installer
