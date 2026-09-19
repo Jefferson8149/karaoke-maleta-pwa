@@ -1,0 +1,39 @@
+name: Export Karaoke Source
+
+on:
+  push:
+    branches:
+      - desktop-v0.10.35-build
+    paths:
+      - 'desktop-build/EXPORTSRC'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  export:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: Karaoke-Maleta-v0.10.36-Corrigida
+          path: previous
+          repository: Jefferson8149/karaoke-maleta-pwa
+          run-id: 35420353650
+          github-token: ${{ github.token }}
+      - name: Extract installed source
+        shell: pwsh
+        run: |
+          $installer=(Get-ChildItem previous -Recurse -Filter 'Karaoke_Maleta_Licenciado_Setup_0.10.36.exe'|Select-Object -First 1).FullName
+          $dest=Join-Path $env:GITHUB_WORKSPACE 'installed'
+          New-Item -ItemType Directory -Force -Path $dest | Out-Null
+          Start-Process -FilePath $installer -ArgumentList '/S',("/D="+$dest) -Wait
+          npx --yes @electron/asar extract (Join-Path $dest 'resources\app.asar') recovered
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Karaoke-Maleta-v0.10.36-RecoveredSource
+          path: recovered
