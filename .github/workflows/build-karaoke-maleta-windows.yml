@@ -18,17 +18,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Reassemble source archive
+      - name: Download finalized source
         shell: pwsh
         run: |
-          $parts = Get-ChildItem 'desktop-build/chunks/part*.txt' | Sort-Object Name
-          $b64 = ($parts | ForEach-Object { Get-Content $_.FullName -Raw }) -join ''
-          [IO.File]::WriteAllBytes('buildsrc.zip', [Convert]::FromBase64String($b64))
-          Expand-Archive -Path 'buildsrc.zip' -DestinationPath '.' -Force
-          New-Item -ItemType Directory -Force -Path 'buildsrc/assets','buildsrc/admin/assets','buildsrc/singer/assets' | Out-Null
-          Copy-Item 'licencas/karaoke_maleta_logo.png' 'buildsrc/assets/karaoke_maleta_logo.png' -Force
-          Copy-Item 'licencas/karaoke_maleta_logo.png' 'buildsrc/admin/assets/karaoke_maleta_logo.png' -Force
-          Copy-Item 'licencas/karaoke_maleta_logo.png' 'buildsrc/singer/assets/karaoke_maleta_logo.png' -Force
+          Invoke-WebRequest -Uri 'https://sdmntprbrazilsouth.oaiusercontent.com/files/00000000-58b0-820e-a7cb-3e7bc4d0631e/raw?se=2026-09-19T02%3A56%3A14Z&sp=r&sv=2026-02-06&sr=b&scid=56baa645-3e4f-5a51-8592-3e784e159194&skoid=33096a49-a96b-4506-9fc4-04a7517f8175&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-18T20%3A24%3A29Z&ske=2026-09-19T20%3A24%3A29Z&sks=b&skv=2026-02-06&sig=Z%2BjRCsbimrzzn7/QS%2Bx4lDFnapP/tKxbV5Tx5efFsd8%3D' -OutFile 'buildfinal.zip'
+          Expand-Archive -Path 'buildfinal.zip' -DestinationPath '.' -Force
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -36,11 +30,11 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        working-directory: buildsrc
+        working-directory: buildfinal
         run: npm install
 
       - name: Build Windows installer
-        working-directory: buildsrc
+        working-directory: buildfinal
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: npm run dist:win
@@ -49,5 +43,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Karaoke-Maleta-Windows-v0.10.35
-          path: buildsrc/dist/Karaoke_Maleta_Setup_0.10.35.exe
+          path: buildfinal/dist/Karaoke_Maleta_Setup_0.10.35.exe
           if-no-files-found: error
