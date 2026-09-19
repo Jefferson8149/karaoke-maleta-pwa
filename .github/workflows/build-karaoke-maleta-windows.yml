@@ -21,7 +21,7 @@ jobs:
       - name: Download finalized source
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri 'https://sdmntprbrazilsouth.oaiusercontent.com/files/00000000-58b0-820e-a7cb-3e7bc4d0631e/raw?se=2026-09-19T02%3A56%3A14Z&sp=r&sv=2026-02-06&sr=b&scid=56baa645-3e4f-5a51-8592-3e784e159194&skoid=33096a49-a96b-4506-9fc4-04a7517f8175&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-18T20%3A24%3A29Z&ske=2026-09-19T20%3A24%3A29Z&sks=b&skv=2026-02-06&sig=Z%2BjRCsbimrzzn7/QS%2Bx4lDFnapP/tKxbV5Tx5efFsd8%3D' -OutFile 'buildfinal.zip'
+          Invoke-WebRequest -Uri 'https://sdmntprbrazilsouth.oaiusercontent.com/files/00000000-f520-820e-9f6e-c993f53ef218/raw?se=2026-09-19T02%3A57%3A43Z&sp=r&sv=2026-02-06&sr=b&scid=4d187b53-c350-5f68-b41d-69a2ac2e2daa&skoid=33096a49-a96b-4506-9fc4-04a7517f8175&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-18T20%3A22%3A14Z&ske=2026-09-19T20%3A22%3A14Z&sks=b&skv=2026-02-06&sig=OdvC4TIdfrz9yG5TNyI2oh2Pv6Sc65hh%2BD1nqlFDY%2BE%3D' -OutFile 'buildfinal.zip'
           Expand-Archive -Path 'buildfinal.zip' -DestinationPath '.' -Force
 
       - name: Setup Node
