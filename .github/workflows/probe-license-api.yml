@@ -1,0 +1,28 @@
+name: Probe License API
+
+on:
+  push:
+    branches:
+      - desktop-v0.10.35-build
+    paths:
+      - 'desktop-build/PROBE'
+
+jobs:
+  probe:
+    runs-on: windows-latest
+    steps:
+      - name: Probe endpoints
+        shell: pwsh
+        run: |
+          $base = 'https://vicpani.com.br/licencas-api'
+          $paths = @('/validate','/licenses/validate','/license/validate','/check','/licenses')
+          foreach($p in $paths){
+            Write-Host "=== $p ==="
+            try {
+              $r = Invoke-WebRequest -Uri ($base+$p) -Method Post -ContentType 'application/json' -Body '{}' -SkipHttpErrorCheck
+              Write-Host ("STATUS="+[int]$r.StatusCode)
+              Write-Host $r.Content
+            } catch {
+              Write-Host $_.Exception.Message
+            }
+          }
