@@ -1,0 +1,53 @@
+name: Build Karaoke Maleta Windows
+
+on:
+  push:
+    branches:
+      - desktop-v0.10.35-build
+    paths:
+      - 'desktop-build/TRIGGER'
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Reassemble source archive
+        shell: pwsh
+        run: |
+          $parts = Get-ChildItem 'desktop-build/chunks/part*.txt' | Sort-Object Name
+          $b64 = ($parts | ForEach-Object { Get-Content $_.FullName -Raw }) -join ''
+          [IO.File]::WriteAllBytes('buildsrc.zip', [Convert]::FromBase64String($b64))
+          Expand-Archive -Path 'buildsrc.zip' -DestinationPath '.' -Force
+          New-Item -ItemType Directory -Force -Path 'buildsrc/assets','buildsrc/admin/assets','buildsrc/singer/assets' | Out-Null
+          Copy-Item 'licencas/karaoke_maleta_logo.png' 'buildsrc/assets/karaoke_maleta_logo.png' -Force
+          Copy-Item 'licencas/karaoke_maleta_logo.png' 'buildsrc/admin/assets/karaoke_maleta_logo.png' -Force
+          Copy-Item 'licencas/karaoke_maleta_logo.png' 'buildsrc/singer/assets/karaoke_maleta_logo.png' -Force
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        working-directory: buildsrc
+        run: npm install
+
+      - name: Build Windows installer
+        working-directory: buildsrc
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run dist:win
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Karaoke-Maleta-Windows-v0.10.35
+          path: buildsrc/dist/Karaoke_Maleta_Setup_0.10.35.exe
+          if-no-files-found: error
